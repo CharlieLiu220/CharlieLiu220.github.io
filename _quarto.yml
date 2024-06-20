@@ -3,18 +3,22 @@ project:
   output-dir: docs
 
 website:
-  title: "CharlieLiu220.github.io"
   navbar:
+    title: "Kaixing Liu"
     left:
       - href: index.qmd
         text: Home
       - about.qmd
+      - resources.qmd
 
 format:
   html:
-    theme: cosmo
+    theme:
+      light: sandstone
+      dark: slate
     css: styles.css
     toc: true
+    page-layout: full
 
 editor: visual
 

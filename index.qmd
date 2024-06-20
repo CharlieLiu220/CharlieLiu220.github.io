@@ -1,11 +1,33 @@
 ---
-title: "CharlieLiu220.github.io"
+title: "Kaixing Liu 刘开星"
+toc: false
+image: MeWebsite.jpg
+about:
+  template: trestles
+  links: 
+    - icon: linkedin
+      text: LinkedIn
+      href: https://www.linkedin.com/in/kaixing-liu-437b78244/?locale=en_US
+    - text: Email
+      href: mailto:kaixing.liu@Vanderbilt.Edu
 ---
 
-This is a Quarto website.
+### Welcome to My Website!
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+I am currently a graduate student in the [Department of Biostatistics](https://www.vumc.org/biostatistics) at [Vanderbilt University](https://www.vanderbilt.edu/).
 
-```{r}
-1 + 1
-```
+### Education
+
+**MS in Biostatistics**, 2023-2025, Vanderbilt University
+
+**BS in Biological Science (minor in Economics and Statistics)**, 2018-2023, Tsinghua University
+
+**High School**, 2015-2018, The High School Attached to Hunan Normal Univeristy
+
+### Research Interest
+
+**Causal Inference**: Instrumental Variable, G-Computation, and etc.
+
+**Data Integration/Fusion**: Combine Randomized Clinical Trials and Observational Studies
+
+**Fundamental Problems of Statistics** and **Data Visualization**

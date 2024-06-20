@@ -2,8 +2,4 @@
 title: "About"
 ---
 
-About this site
-
-```{r}
-1 + 1
-```
+This website is intended for **Academic Communication**. I plan to write blogs to record my thoughts and understandings (technical/philosophical) in statistics, data science, mathematics, and etc. Feel free to email me if you have any question.
