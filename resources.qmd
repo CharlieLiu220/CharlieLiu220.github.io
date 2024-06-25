@@ -5,3 +5,7 @@ title: "Resources I find Useful"
 ### Building your Personal Website
 
 [Quarto in R for local construction and Github Page for deployment](https://ucsb-meds.github.io/creating-quarto-websites/)
+
+### Causal Inference
+
+[Basics of Doubly Robust Estimator](http://www2.stat.duke.edu/~fl35/teaching/640/Chap3.5_Doubly%20Robust%20Estimation.pdf) (thanks to Dr. Fan Li)
