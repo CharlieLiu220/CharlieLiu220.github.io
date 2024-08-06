@@ -12,7 +12,11 @@ about:
       href: mailto:kaixing.liu@Vanderbilt.Edu
 ---
 
-<meta name="google-site-verification" content="brvqqjtOofNeWsnSnPKFYGyZovSPHBFOCjR4QfY6IIM" />
+```{html}
+<head>
+  <meta name="google-site-verification" content="brvqqjtOofNeWsnSnPKFYGyZovSPHBFOCjR4QfY6IIM" />
+</head>
+```
 
 ### Welcome to My Website!
 
