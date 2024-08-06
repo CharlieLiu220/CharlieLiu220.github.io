@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Kaixing Liu 刘开星</title>
+<title>Kaixing’s Blog</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -30,9 +30,12 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-listing/list.min.js"></script>
+<script src="site_libs/quarto-listing/quarto-listing.js"></script>
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
@@ -60,7 +63,38 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script>
 
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    const listingTargetEl = window.document.querySelector('#listing-listing .list');
+    if (!listingTargetEl) {
+      // No listing discovered, do not attach.
+      return; 
+    }
+
+    const options = {
+      valueNames: ['listing-date','listing-title','listing-author','listing-image','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
+      
+      searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description","listing-categories"],
+    };
+
+    window['quarto-listings'] = window['quarto-listings'] || {};
+    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
+
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  });
+
+  window.addEventListener('hashchange',() => {
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  })
+  </script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -87,11 +121,11 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" rel="" target="" aria-current="page">
+    <a class="nav-link" href="./index.html" rel="" target="">
  <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./blogs.html" rel="" target="">
+    <a class="nav-link active" href="./blogs.html" rel="" target="" aria-current="page">
  <span class="menu-text">Kaixing’s Blog</span></a>
   </li>  
   <li class="nav-item">
@@ -110,51 +144,75 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(1)</span></div><div class="category" data-category="RStudio">RStudio <span class="quarto-category-count">(1)</span></div></div></div>
 <!-- main -->
-<div class="quarto-about-trestles column-page">
-  <div class="about-entity">
-    <img src="MeWebsite.jpg" class="about-image
-  rounded " style="width: 20em;">
+<main class="content column-page-left" id="quarto-document-content">
+
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Kaixing Liu 刘开星</h1>
+<h1 class="title">Kaixing’s Blog</h1>
 </div>
+
+
+
 <div class="quarto-title-meta">
+
+    
+  
+    
   </div>
+  
+
 </header>
-    <div class="about-links">
-  <a href="https://www.linkedin.com/in/kaixing-liu-437b78244/?locale=en_US" class="about-link" rel="" target="">
-    <i class="bi bi-linkedin"></i>
-     <span class="about-link-text">LinkedIn</span>
-  </a>
-  <a href="mailto:kaixing.liu@Vanderbilt.Edu" class="about-link" rel="" target="">
-     <span class="about-link-text">Email</span>
-  </a>
-</div>
-  </div>
-  <div class="about-contents"><main class="content column-page" id="quarto-document-content">
-<section id="welcome-to-my-website" class="level3">
-<h3 data-anchor-id="welcome-to-my-website">Welcome to My Website!</h3>
-<p>I am currently a graduate student in the <a href="https://www.vumc.org/biostatistics">Department of Biostatistics</a> at <a href="https://www.vanderbilt.edu/">Vanderbilt University</a>.</p>
-</section>
-<section id="education" class="level3">
-<h3 data-anchor-id="education">Education</h3>
-<p><strong>MS in Biostatistics</strong>, 2023-2025, Vanderbilt University</p>
-<p><strong>BS in Biological Science (minor in Economics and Statistics)</strong>, 2018-2023, Tsinghua University</p>
-<p><strong>High School</strong>, 2015-2018, The High School Attached to Hunan Normal Univeristy</p>
-</section>
-<section id="research-interest" class="level3">
-<h3 data-anchor-id="research-interest">Research Interest</h3>
-<p><strong>Causal Inference</strong>: Instrumental Variable, G-Computation, and etc.</p>
-<p><strong>Data Integration/Fusion</strong>: Combine Randomized Clinical Trials and Observational Studies</p>
-<p><strong>Fundamental Problems of Statistics</strong> and <strong>Data Visualization</strong></p>
 
 
-</section>
-</main></div>
+
+
+
+<div class="quarto-listing quarto-listing-container-default" id="listing-listing">
+<div class="list quarto-listing-default">
+<div class="quarto-post image-right" data-index="0" data-categories="RStudio" data-listing-date-sort="1722920400000" data-listing-file-modified-sort="1722974371261" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2">
+<div class="thumbnail">
+<p><a href="./blog/08-06-2024-Blog1/index.html"> <img src="./blog/08-06-2024-Blog1/Dark-Mode-Hero.jpg" class="thumbnail-image"> </a></p>
 </div>
- <!-- /main -->
+<div class="body">
+<a href="./blog/08-06-2024-Blog1/index.html">
+<h3 class="no-anchor listing-title">
+Set up NIGHT MODE for your RStudio
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('RStudio'); return false;">
+RStudio
+</div>
+</div>
+<a href="./blog/08-06-2024-Blog1/index.html">
+<div class="listing-description">
+<p>You will not be flashed when coding in the middle night with this NIGHT MODE.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./blog/08-06-2024-Blog1/index.html">
+<div class="listing-date">
+Aug 6, 2024
+</div>
+<div class="listing-author">
+Kaixing Liu
+</div>
+</a>
+</div>
+</div>
+</div>
+<div class="listing-no-matching d-none">
+No matching items
+</div>
+</div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -290,6 +348,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   } else {
     toggleColorMode(false);
   }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
   const isCodeAnnotation = (el) => {
     for (const clz of el.classList) {
       if (clz.startsWith('code-annotation-')) {                     

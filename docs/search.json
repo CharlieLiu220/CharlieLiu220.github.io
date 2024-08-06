@@ -4,7 +4,14 @@
     "href": "resources.html",
     "title": "Resources I find Useful",
     "section": "",
-    "text": "Building your Personal Website\nQuarto in R for local construction and Github Page for deployment\n\n\nCausal Inference\nBasics of Doubly Robust Estimator (thanks to Dr. Fan Li)"
+    "text": "Building your Personal Website\nQuarto in R for local construction and Github Page for deployment\nAdd Blogs to your personal website based on Quarto\n\n\nCausal Inference\nBasics of Doubly Robust Estimator (thanks to Dr. Fan Li)"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "This website is intended for Academic Communication. I plan to write blogs to record my thoughts and understandings (technical/philosophical) in statistics, data science, mathematics, and etc. Feel free to email me if you have any question."
   },
   {
     "objectID": "index.html",
@@ -14,10 +21,17 @@
     "text": "Welcome to My Website!\nI am currently a graduate student in the Department of Biostatistics at Vanderbilt University.\n\n\nEducation\nMS in Biostatistics, 2023-2025, Vanderbilt University\nBS in Biological Science (minor in Economics and Statistics), 2018-2023, Tsinghua University\nHigh School, 2015-2018, The High School Attached to Hunan Normal Univeristy\n\n\nResearch Interest\nCausal Inference: Instrumental Variable, G-Computation, and etc.\nData Integration/Fusion: Combine Randomized Clinical Trials and Observational Studies\nFundamental Problems of Statistics and Data Visualization"
   },
   {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About",
+    "objectID": "blog/08-06-2024-Blog1/index.html",
+    "href": "blog/08-06-2024-Blog1/index.html",
+    "title": "Set up NIGHT MODE for your RStudio",
     "section": "",
-    "text": "This website is intended for Academic Communication. I plan to write blogs to record my thoughts and understandings (technical/philosophical) in statistics, data science, mathematics, and etc. Feel free to email me if you have any question."
+    "text": "As is known that there are multiple themes for RStudio, I have used the light theme for a long time since I code most of the time during the day. Yet, yesterday at 1am when I switched between Github(with Night Mode) and RStudio, my eyes were crying. Below is what I figured out to make RStudio alternate between light and dark themes according to the time.\nThe basic idea is preparing a list of themes to be used and setting options and environmental variables for your RStudio.\n\nStep 1\nInstall rsthemes package and a dozen of themes.\n\n# install.packages(\"devtools\")\ndevtools::install_github(\"gadenbuie/rsthemes\")\n# or\ninstall.packages(\n  \"rsthemes\",\n  repos = c(gadenbuie = 'https://gadenbuie.r-universe.dev', getOption(\"repos\"))\n) # but this package is not updated to the newest version of R so stronly recommends installment from github\n\nThen, install themes for use.\n\nrsthemes::install_rsthemes()\n# list installed themes\nrsthemes::list_rsthemes()\n# try all themes\nrsthemes::try_rsthemes()\n\n\n\nStep 2\nEdit your .Rprofile via this usethis::edit_r_profile() within a R session in RStudio. Then, your .Rprofile will pop up in source panel of RStudio. Copy this (below) and save. You can customize your preferred themes and the time to switch to night mode and back.\n\nif (interactive() && requireNamespace(\"rsthemes\", quietly = TRUE)) {\n  # Set preferred themes if not handled elsewhere..\n  rsthemes::set_theme_light(\"One Light {rsthemes}\")  # light theme\n  rsthemes::set_theme_dark(\"One Dark {rsthemes}\") # dark theme\n\n  # Whenever the R session restarts inside RStudio...\n  setHook(\"rstudio.sessionInit\", function(isNewSession) {\n    # Automatically choose the correct theme based on time of day\n    rsthemes::use_theme_auto(dark_start = \"18:00\", dark_end = \"6:00\")\n  }, action = \"append\")\n}\n\nRestart R and done. The awkward thing is that the switch works only when you restart your R session but anyway easier than switching themes manually.\nYou can refer to these for details, change RStudio theme based on time of day and manage R with .Rprofile."
+  },
+  {
+    "objectID": "blogs.html",
+    "href": "blogs.html",
+    "title": "Kaixing’s Blog",
+    "section": "",
+    "text": "Set up NIGHT MODE for your RStudio\n\n\n\n\n\n\n\nRStudio\n\n\n\n\nYou will not be flashed when coding in the middle night with this NIGHT MODE.\n\n\n\n\n\n\nAug 6, 2024\n\n\nKaixing Liu\n\n\n\n\n\n\nNo matching items"
   }
 ]

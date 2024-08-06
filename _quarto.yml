@@ -6,9 +6,10 @@ website:
   navbar:
     title: "Kaixing Liu"
     left:
+      - about.qmd
       - href: index.qmd
         text: Home
-      - about.qmd
+      - blogs.qmd
       - resources.qmd
 
 format:

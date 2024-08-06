@@ -1,0 +1,63 @@
+---
+title: "Set up NIGHT MODE for your RStudio"
+description: "You will not be flashed when coding in the middle night with this NIGHT MODE."
+author:
+  - name: Kaixing Liu
+date: 08-06-2024
+categories: [RStudio] # self-defined categories
+image: Dark-Mode-Hero.jpg
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+format:
+  html:
+    code-copy: true
+---
+
+As is known that there are multiple themes for RStudio, I have used the light theme for a long time since I code most of the time during the day. Yet, yesterday at 1am when I switched between Github(with Night Mode) and RStudio, my eyes were crying. Below is what I figured out to make RStudio alternate between light and dark themes according to the time.
+
+The basic idea is preparing a list of themes to be used and setting options and environmental variables for your RStudio.
+
+### Step 1
+
+Install [`rsthemes`](https://github.com/gadenbuie/rsthemes) package and a dozen of themes.
+
+```{r, eval=FALSE}
+# install.packages("devtools")
+devtools::install_github("gadenbuie/rsthemes")
+# or
+install.packages(
+  "rsthemes",
+  repos = c(gadenbuie = 'https://gadenbuie.r-universe.dev', getOption("repos"))
+) # but this package is not updated to the newest version of R so stronly recommends installment from github
+```
+
+Then, install themes for use.
+
+```{r, eval=FALSE}
+rsthemes::install_rsthemes()
+# list installed themes
+rsthemes::list_rsthemes()
+# try all themes
+rsthemes::try_rsthemes()
+```
+
+### Step 2
+
+Edit your `.Rprofile` via this `usethis::edit_r_profile()` within a R session in RStudio. Then, your `.Rprofile` will pop up in source panel of RStudio. Copy this (below) and save. You can customize your preferred themes and the time to switch to night mode and back.
+
+```{r, eval=FALSE}
+if (interactive() && requireNamespace("rsthemes", quietly = TRUE)) {
+  # Set preferred themes if not handled elsewhere..
+  rsthemes::set_theme_light("One Light {rsthemes}")  # light theme
+  rsthemes::set_theme_dark("One Dark {rsthemes}") # dark theme
+
+  # Whenever the R session restarts inside RStudio...
+  setHook("rstudio.sessionInit", function(isNewSession) {
+    # Automatically choose the correct theme based on time of day
+    rsthemes::use_theme_auto(dark_start = "18:00", dark_end = "6:00")
+  }, action = "append")
+}
+```
+
+Restart R and done. The awkward thing is that the switch works only when you restart your R session but anyway easier than switching themes manually.
+
+You can refer to these for details, [change RStudio theme based on time of day](https://forum.posit.co/t/change-rstudio-theme-based-on-time-of-day/115888) and [manage R with .Rprofile](https://support.posit.co/hc/en-us/articles/360047157094-Managing-R-with-Rprofile-Renviron-Rprofile-site-Renviron-site-rsession-conf-and-repos-conf).
