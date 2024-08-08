@@ -1,0 +1,101 @@
+---
+title: "Implement Bayesian Inference using Stan in R"
+description: "Here, Stan is a probabilistic programming language written in C++ not the song by Eminem that I really like."
+author:
+  - name: Kaixing Liu
+date: 08-08-2024
+categories: [Bayesian Statistics, Stan, R] # self-defined categories
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+format:
+  html:
+    code-copy: true
+---
+
+Under the Bayesian paradigm, the statistical inference is conducted on the posterior distribution of parameters or the posterior predictive distribution of outcomes depending on the quantity of interest. In most cases, the posterior distributions are complex and known up to a constant factor (unknown) at best. It is Markov Chain Monte Carlo (MCMC) that makes the posterior estimation/inference doable and easier via simulating draws from the posterior distribution.
+
+Today, how MCMC works is not the focus. Instead, I will use several examples to illustrate conducting Bayesian inference with Stan (based on Hamiltonian MCMC) in R.
+
+First of all, we should install `rstan` package, the R interface to Stan, and the tools for compilation of C++ code in our computer. ([Refer to Stan official guide for details.](https://mc-stan.org/users/interfaces/rstan.html))
+
+### Example 1, beta-binomial
+
+$$
+\theta \sim \text{Beta}(\alpha,\beta)
+$$
+
+$$
+Y|\theta \sim \text{Bernoulli}(\theta)
+$$ Observed data, $\{y_1,y_2,...,y_n\}$ (**iid**).
+
+$$
+p(\theta|\boldsymbol{y})\propto p(\boldsymbol{y}|\theta)\pi(\theta)\propto \theta^{\sum_i y_i}(1-\theta)^{n-\sum_i y_i}\theta^{\alpha-1}(1-\theta)^{\beta-1}
+$$
+
+Therefore,
+
+$$
+\theta|\boldsymbol{y}\sim \text{Beta}(\alpha+\sum_i y_i,\beta+n-\sum_i y_i)
+$$
+
+::: {.callout-note appearance="simple"}
+This posterior distribution is a well-known distribution and we don't bother to use Stan; it is chosen mainly to have theoretical results to compare with those obtained from Stan.
+:::
+
+```{r}
+# specify prior and data generation mechanism
+## hyperparameters
+alpha = 1
+beta = 1 ### thus an uninformative prior
+##
+theta = 0.45
+n = 100
+set.seed(0808)
+y = rbinom(n, 1, prob = theta)
+```
+
+Before we call Stan in R, we need to create a `.stan` file (easy to do in Rstudio) written in Stan language, pretty straightforward and concise. ([Stan Reference Manual for language details](https://mc-stan.org/docs/reference-manual/))
+
+```{stan output.var="beta_binomial_model"}
+data { // Y is the observation vector with N observations
+  int<lower=0> N;
+  array[N] int Y;
+}
+
+parameters { // theta is bounded between 0 and 1
+  real<lower=0, upper=1> theta;
+}
+
+model {
+  theta ~ beta(1, 1); // specify prior distribution
+  for(n in 1:N){
+    Y[n] ~ binomial(1, theta); // specify model for data
+  }
+}
+
+```
+
+Now we can load `rstan` package and call `stan` function to simulate a posterior sample. (For this example, executable Stan code is inserted to output a `stanmodel` for `sampling` function as input. If we create a separate `.stan` file in the same directory, use `stan` function.)
+
+```{r, message=FALSE}
+library(rstan)
+options(mc.cores = parallel::detectCores()) # parallel computing, one chain per core
+rstan_options(auto_write = TRUE) # only need one time of compilation of C++ code
+dat = list(N=n, Y=y) # consistent with data block in .stan file
+beta_binomial_fit = sampling(beta_binomial_model, data = dat, algorithm="HMC")
+```
+
+::: {.callout-note appearance="simple"}
+Initial points (values) for MCMC are likely to influence the time it takes for the chains to reach the stationary distribution (target posterior distribution). Thus, draws during sampling period (default, 1001-2000) of each chain (default, 4 chains) are collapsed together to form a final posterior sample.
+:::
+
+The match between the histogram of the sample and the theoretical density curve of the posterior distribution is satisfactory.
+
+```{r, fig.cap="Posterior distribution of theta in beta-binomial example"}
+theta_post = extract(beta_binomial_fit, permuted=T)$theta
+hist(theta_post, freq = F, main = NULL, xlim = c(0,1),
+     xlab = "theta|y")
+lines(seq(0.1, 1, length.out = 1000), dbeta(seq(0.1, 1, length.out = 1000),
+                              shape1 = alpha+sum(y),
+                              shape2 = beta+n-sum(y)),
+      col="red")
+```
