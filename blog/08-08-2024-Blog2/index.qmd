@@ -259,4 +259,147 @@ lines(seq(0, 1, length.out = 1000), dbeta(seq(0, 1, length.out = 1000),
       col="red")
 ```
 
-### Example 4, linear regression under  
+### Example 4, Bayesian linear regression
+
+Refer to the Bayesian analysis of [classical regression]{.underline} in [Chapter 14 of Bayesian Data Analysis, 3rd](http://www.stat.columbia.edu/~gelman/book/BDA3.pdf).
+
+$$
+p(\boldsymbol{\beta},\sigma^2|X)\propto \sigma^{-2} 
+$$
+
+$$
+Y|\boldsymbol{\beta},\sigma^2,X\sim N(X\boldsymbol{\beta},\sigma^2I),\ \text{where}\ Y\ \text{is random vector of length n}
+$$
+
+$$
+p(\boldsymbol{\beta},\sigma^2|\boldsymbol{y},X)\propto \sigma^{-n}\exp(-\frac{1}{2}(\boldsymbol{y}-X\boldsymbol{\beta})^T(\sigma^2I)^{-1}(\boldsymbol{y}-X\boldsymbol{\beta}))\sigma^{-2}\\
+\propto \sigma^{-(n+2)}\exp(-\frac{1}{2\sigma^2}(\boldsymbol{y}-X\boldsymbol{\beta})^T(\boldsymbol{y}-X\boldsymbol{\beta}))
+$$
+
+With some algebra,
+
+$$
+\exp((\boldsymbol{y}-X\boldsymbol{\beta})^T(\boldsymbol{y}-X\boldsymbol{\beta}))\propto \exp(\boldsymbol{\beta}^TX^TX\boldsymbol{\beta}-2\boldsymbol{\beta}^TX^Ty)\\
+\propto \exp((\boldsymbol{\beta}-(X^TX)^{-1}X^Ty)^T(X^TX)(\boldsymbol{\beta}-(X^TX)^{-1}X^Ty))
+$$
+
+$$
+\boldsymbol{\beta}|\sigma^2,\boldsymbol{y},X \sim N((X^TX)^{-1}X^Ty, \sigma^2(X^TX)^{-1})
+$$
+
+$$
+p(\boldsymbol{\beta},\sigma^2|\boldsymbol{y},X)=p(\boldsymbol{\beta}|\sigma^2,\boldsymbol{y},X)p(\sigma^2|\boldsymbol{y},X)
+$$
+
+Therefore,
+
+$$
+p(\sigma^2|\boldsymbol{y},X)=\frac{
+p(\boldsymbol{\beta},\sigma^2|\boldsymbol{y},X)}{p(\boldsymbol{\beta}|\sigma^2,\boldsymbol{y},X)}\\
+\propto \frac{\sigma^{-(n+2)}\exp(-\frac{1}{2\sigma^2}(\boldsymbol{y}-X\boldsymbol{\beta})^T(\boldsymbol{y}-X\boldsymbol{\beta}))}{\sigma^{-p}\exp(-\frac{1}{2\sigma^2}(\boldsymbol{\beta}-(X^TX)^{-1}X^Ty)^T(X^TX)(\boldsymbol{\beta}-(X^TX)^{-1}X^Ty)}\\
+\propto \sigma^{-(n+2-p)}\exp(-\frac{1}{2\sigma^2}(\boldsymbol{y}^T\boldsymbol{y}-(X^T\boldsymbol{y})^T(X^TX)^{-1}X^T\boldsymbol{y})) 
+$$
+
+Refer to the pdf of [scaled inverse-chi-square distribution](https://en.wikipedia.org/wiki/Scaled_inverse_chi-squared_distribution),
+
+$$
+p(\sigma^2|\boldsymbol{y},X)\propto \frac{1}{(\sigma^2)^{\frac{n-p}{2}+1}}\exp(-\frac{(n-p)\frac{1}{n-p}(\boldsymbol{y}-X\hat{\boldsymbol{\beta}})^T(\boldsymbol{y}-X\hat{\boldsymbol{\beta}})}{2(\sigma^2)})
+$$
+
+Hence,
+
+$$
+\sigma^2|\boldsymbol{y},X\sim \text{scaled Inv-}\chi^2(n-p,\frac{1}{n-p}(\boldsymbol{y}-X\hat{\boldsymbol{\beta}})^T(\boldsymbol{y}-X\hat{\boldsymbol{\beta}}))
+$$
+
+::: {.callout-note appearance="simple"}
+$p$ is the number of columns of the design matrix $X$ including a column of $1$. Recall that in frequentist classical linear regression, $\hat{\boldsymbol{\beta}}=(X^TX)^{-1}X^T\boldsymbol{y},\ \text{Var}(\hat{\boldsymbol{\beta}})=\sigma^2(X^TX)^{-1},\ \hat{\sigma^2}= \frac{1}{n-p}(\boldsymbol{y}-X\hat{\boldsymbol{\beta}})^T(\boldsymbol{y}-X\hat{\boldsymbol{\beta}})$.
+:::
+
+For simplification, consider $p=2$.
+
+```{r, message=FALSE}
+# generate data
+set.seed(0809)
+x = rbinom(n, 1, prob = 0.55) # covariate is binary
+beta_0 = 0.5 # intercept
+beta_1 = 0.2 # effect
+set.seed(0809)
+y_linear_regression = beta_0 + x*beta_1 + rnorm(n, 0, 1)
+dat_linear = list(N=n, Y=y_linear_regression, x0=rep(1, n), x1=x)
+```
+
+```{stan output.var="bayesian_linear_regression"}
+functions {
+  real logposterior(real y, real beta0, real beta1, real x0, real x1, real sigma2){
+  return -(y-beta0*x0-beta1*x1)^2/(2*sigma2) - log(sigma2)/2;
+  }
+}
+
+data { // Y is the outcome vector with N observations 
+  int<lower=0> N;
+  array[N] real Y;
+  array[N] real x0;
+  array[N] real x1;
+}
+
+parameters { // beta and sigma2
+  real beta0;
+  real beta1;
+  real<lower=0> sigma2;
+}
+
+
+model {
+  target += -log(sigma2);
+  for(n in 1:N){
+    target += logposterior(Y[n], beta0, beta1, x0[n], x1[n], sigma2);
+  }
+}
+
+```
+
+```{r, message=FALSE}
+bayesian_linear_fit = sampling(bayesian_linear_regression,
+                               data=dat_linear)
+beta0_post = extract(bayesian_linear_fit, par="beta0", permuted=T)$beta0
+beta1_post = extract(bayesian_linear_fit, par="beta1", permuted=T)$beta1
+sigma2_post = extract(bayesian_linear_fit, par="sigma2", permuted=T)$sigma2
+mean(beta0_post)
+mean(beta1_post)
+mean(sigma2_post)
+lm_fit = lm(y~x1, data = data.frame(y=dat_linear$Y, x1=dat_linear$x1))
+coefficients(lm_fit)
+sum(lm_fit$residuals^2)/lm_fit$df.residual
+```
+
+```{r, fig.cap="Posterior distribution of beta and sigma2 in bayesian linear regression", message=FALSE}
+# sigma2
+scaled_inv_chi2_pdf = function(x, nu, tau2){
+  return((((tau2*nu/2)^(nu/2))/(gamma(nu/2)))*(exp(-nu*tau2/(2*x))/(x^(1+nu/2))))
+}
+hist(sigma2_post, freq = F, main = NULL, xlim = c(0.5,2.5),
+     xlab = "sigma2|y")
+lines(seq(0.5, 2.5, length.out = 1000), scaled_inv_chi2_pdf(seq(0.5, 2.5, length.out = 1000), nu = lm_fit$df.residual, tau2 = sum(lm_fit$residuals^2)/lm_fit$df.residual),
+      col="red")
+# beta
+library(MASS)
+X = matrix(c(dat_linear$x0, dat_linear$x1), ncol = 2, byrow = F)
+Beta = sapply(sigma2_post, function(z) mvrnorm(n=1, mu = solve(t(X)%*%X)%*%t(X)%*%as.matrix(dat_linear$Y, ncol=1), Sigma = z*solve(t(X)%*%X)))
+## beta0
+hist(beta0_post, freq = F, main = NULL, xlim = c(-0.5,1.5),
+     xlab = "beta0|y")
+lines(density(Beta[1, ])$x, density(Beta[1, ])$y, 
+      col="red")
+## beta1
+hist(beta1_post, freq = F, main = NULL, xlim = c(-1,1.5),
+     xlab = "beta1|y")
+lines(density(Beta[2, ])$x, density(Beta[2, ])$y, 
+      col="red")
+```
+
+::: {.callout-tip appearance="simple"}
+The marginal posterior distribution of $\boldsymbol \beta$ is unknown up to this point and its conditional posterior distribution is known, multivariate normal. Thus, we can simulate posterior draws of $\boldsymbol \beta$ based on the conditional distribution and simulated draws of $\sigma^2$ to compare with draws obtained from Stan.
+:::
+
+### Stan is Powerful!!!  

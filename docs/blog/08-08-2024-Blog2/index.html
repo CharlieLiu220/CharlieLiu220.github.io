@@ -196,7 +196,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#example-1-beta-binomial" id="toc-example-1-beta-binomial" class="nav-link active" data-scroll-target="#example-1-beta-binomial">Example 1, beta-binomial</a></li>
   <li><a href="#example-2-normal-normal" id="toc-example-2-normal-normal" class="nav-link" data-scroll-target="#example-2-normal-normal">Example 2, normal-normal</a></li>
   <li><a href="#example-3-dirichlet-multinomial" id="toc-example-3-dirichlet-multinomial" class="nav-link" data-scroll-target="#example-3-dirichlet-multinomial">Example 3, Dirichlet-multinomial</a></li>
-  <li><a href="#example-4-linear-regression-under" id="toc-example-4-linear-regression-under" class="nav-link" data-scroll-target="#example-4-linear-regression-under">Example 4, linear regression under</a></li>
+  <li><a href="#example-4-bayesian-linear-regression" id="toc-example-4-bayesian-linear-regression" class="nav-link" data-scroll-target="#example-4-bayesian-linear-regression">Example 4, Bayesian linear regression</a></li>
+  <li><a href="#stan-is-powerful" id="toc-stan-is-powerful" class="nav-link" data-scroll-target="#stan-is-powerful">Stan is Powerful!!!</a></li>
   </ul>
 </nav>
     </div>
@@ -517,8 +518,214 @@ p(\boldsymbol{\theta}|\boldsymbol{y})\propto \Pi_k \theta_k^{y_k}\Pi_k \theta_k^
 </div>
 </div>
 </section>
-<section id="example-4-linear-regression-under" class="level3">
-<h3 class="anchored" data-anchor-id="example-4-linear-regression-under">Example 4, linear regression under</h3>
+<section id="example-4-bayesian-linear-regression" class="level3">
+<h3 class="anchored" data-anchor-id="example-4-bayesian-linear-regression">Example 4, Bayesian linear regression</h3>
+<p>Refer to the Bayesian analysis of <u>classical regression</u> in <a href="http://www.stat.columbia.edu/~gelman/book/BDA3.pdf">Chapter 14 of Bayesian Data Analysis, 3rd</a>.</p>
+<p><span class="math display">\[
+p(\boldsymbol{\beta},\sigma^2|X)\propto \sigma^{-2}
+\]</span></p>
+<p><span class="math display">\[
+Y|\boldsymbol{\beta},\sigma^2,X\sim N(X\boldsymbol{\beta},\sigma^2I),\ \text{where}\ Y\ \text{is random vector of length n}
+\]</span></p>
+<p><span class="math display">\[
+p(\boldsymbol{\beta},\sigma^2|\boldsymbol{y},X)\propto \sigma^{-n}\exp(-\frac{1}{2}(\boldsymbol{y}-X\boldsymbol{\beta})^T(\sigma^2I)^{-1}(\boldsymbol{y}-X\boldsymbol{\beta}))\sigma^{-2}\\
+\propto \sigma^{-(n+2)}\exp(-\frac{1}{2\sigma^2}(\boldsymbol{y}-X\boldsymbol{\beta})^T(\boldsymbol{y}-X\boldsymbol{\beta}))
+\]</span></p>
+<p>With some algebra,</p>
+<p><span class="math display">\[
+\exp((\boldsymbol{y}-X\boldsymbol{\beta})^T(\boldsymbol{y}-X\boldsymbol{\beta}))\propto \exp(\boldsymbol{\beta}^TX^TX\boldsymbol{\beta}-2\boldsymbol{\beta}^TX^Ty)\\
+\propto \exp((\boldsymbol{\beta}-(X^TX)^{-1}X^Ty)^T(X^TX)(\boldsymbol{\beta}-(X^TX)^{-1}X^Ty))
+\]</span></p>
+<p><span class="math display">\[
+\boldsymbol{\beta}|\sigma^2,\boldsymbol{y},X \sim N((X^TX)^{-1}X^Ty, \sigma^2(X^TX)^{-1})
+\]</span></p>
+<p><span class="math display">\[
+p(\boldsymbol{\beta},\sigma^2|\boldsymbol{y},X)=p(\boldsymbol{\beta}|\sigma^2,\boldsymbol{y},X)p(\sigma^2|\boldsymbol{y},X)
+\]</span></p>
+<p>Therefore,</p>
+<p><span class="math display">\[
+p(\sigma^2|\boldsymbol{y},X)=\frac{
+p(\boldsymbol{\beta},\sigma^2|\boldsymbol{y},X)}{p(\boldsymbol{\beta}|\sigma^2,\boldsymbol{y},X)}\\
+\propto \frac{\sigma^{-(n+2)}\exp(-\frac{1}{2\sigma^2}(\boldsymbol{y}-X\boldsymbol{\beta})^T(\boldsymbol{y}-X\boldsymbol{\beta}))}{\sigma^{-p}\exp(-\frac{1}{2\sigma^2}(\boldsymbol{\beta}-(X^TX)^{-1}X^Ty)^T(X^TX)(\boldsymbol{\beta}-(X^TX)^{-1}X^Ty)}\\
+\propto \sigma^{-(n+2-p)}\exp(-\frac{1}{2\sigma^2}(\boldsymbol{y}^T\boldsymbol{y}-(X^T\boldsymbol{y})^T(X^TX)^{-1}X^T\boldsymbol{y}))
+\]</span></p>
+<p>Refer to the pdf of <a href="https://en.wikipedia.org/wiki/Scaled_inverse_chi-squared_distribution">scaled inverse-chi-square distribution</a>,</p>
+<p><span class="math display">\[
+p(\sigma^2|\boldsymbol{y},X)\propto \frac{1}{(\sigma^2)^{\frac{n-p}{2}+1}}\exp(-\frac{(n-p)\frac{1}{n-p}(\boldsymbol{y}-X\hat{\boldsymbol{\beta}})^T(\boldsymbol{y}-X\hat{\boldsymbol{\beta}})}{2(\sigma^2)})
+\]</span></p>
+<p>Hence,</p>
+<p><span class="math display">\[
+\sigma^2|\boldsymbol{y},X\sim \text{scaled Inv-}\chi^2(n-p,\frac{1}{n-p}(\boldsymbol{y}-X\hat{\boldsymbol{\beta}})^T(\boldsymbol{y}-X\hat{\boldsymbol{\beta}}))
+\]</span></p>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><span class="math inline">\(p\)</span> is the number of columns of the design matrix <span class="math inline">\(X\)</span> including a column of <span class="math inline">\(1\)</span>. Recall that in frequentist classical linear regression, <span class="math inline">\(\hat{\boldsymbol{\beta}}=(X^TX)^{-1}X^T\boldsymbol{y},\ \text{Var}(\hat{\boldsymbol{\beta}})=\sigma^2(X^TX)^{-1},\ \hat{\sigma^2}= \frac{1}{n-p}(\boldsymbol{y}-X\hat{\boldsymbol{\beta}})^T(\boldsymbol{y}-X\hat{\boldsymbol{\beta}})\)</span>.</p>
+</div>
+</div>
+</div>
+<p>For simplification, consider <span class="math inline">\(p=2\)</span>.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># generate data</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">0809</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>x <span class="ot">=</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="at">prob =</span> <span class="fl">0.55</span>) <span class="co"># covariate is binary</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>beta_0 <span class="ot">=</span> <span class="fl">0.5</span> <span class="co"># intercept</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>beta_1 <span class="ot">=</span> <span class="fl">0.2</span> <span class="co"># effect</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">0809</span>)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>y_linear_regression <span class="ot">=</span> beta_0 <span class="sc">+</span> x<span class="sc">*</span>beta_1 <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>dat_linear <span class="ot">=</span> <span class="fu">list</span>(<span class="at">N=</span>n, <span class="at">Y=</span>y_linear_regression, <span class="at">x0=</span><span class="fu">rep</span>(<span class="dv">1</span>, n), <span class="at">x1=</span>x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-output.var="bayesian_linear_regression">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> logposterior(<span class="dt">real</span> y, <span class="dt">real</span> beta0, <span class="dt">real</span> beta1, <span class="dt">real</span> x0, <span class="dt">real</span> x1, <span class="dt">real</span> sigma2){</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> -(y-beta0*x0-beta1*x1)^<span class="dv">2</span>/(<span class="dv">2</span>*sigma2) - log(sigma2)/<span class="dv">2</span>;</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> { <span class="co">// Y is the outcome vector with N observations </span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">real</span> Y;</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">real</span> x0;</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">real</span> x1;</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> { <span class="co">// beta and sigma2</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> beta0;</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> beta1;</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma2;</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>  <span class="kw">target +=</span> -log(sigma2);</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(n <span class="cf">in</span> <span class="dv">1</span>:N){</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">target +=</span> logposterior(Y[n], beta0, beta1, x0[n], x1[n], sigma2);</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>bayesian_linear_fit <span class="ot">=</span> <span class="fu">sampling</span>(bayesian_linear_regression,</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>                               <span class="at">data=</span>dat_linear)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>beta0_post <span class="ot">=</span> <span class="fu">extract</span>(bayesian_linear_fit, <span class="at">par=</span><span class="st">"beta0"</span>, <span class="at">permuted=</span>T)<span class="sc">$</span>beta0</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>beta1_post <span class="ot">=</span> <span class="fu">extract</span>(bayesian_linear_fit, <span class="at">par=</span><span class="st">"beta1"</span>, <span class="at">permuted=</span>T)<span class="sc">$</span>beta1</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>sigma2_post <span class="ot">=</span> <span class="fu">extract</span>(bayesian_linear_fit, <span class="at">par=</span><span class="st">"sigma2"</span>, <span class="at">permuted=</span>T)<span class="sc">$</span>sigma2</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(beta0_post)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.4000068</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(beta1_post)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.1179789</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(sigma2_post)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.217507</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>lm_fit <span class="ot">=</span> <span class="fu">lm</span>(y<span class="sc">~</span>x1, <span class="at">data =</span> <span class="fu">data.frame</span>(<span class="at">y=</span>dat_linear<span class="sc">$</span>Y, <span class="at">x1=</span>dat_linear<span class="sc">$</span>x1))</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coefficients</span>(lm_fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>(Intercept)          x1 
+  0.4010346   0.1171188 </code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(lm_fit<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)<span class="sc">/</span>lm_fit<span class="sc">$</span>df.residual</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.191846</code></pre>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># sigma2</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>scaled_inv_chi2_pdf <span class="ot">=</span> <span class="cf">function</span>(x, nu, tau2){</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>((((tau2<span class="sc">*</span>nu<span class="sc">/</span><span class="dv">2</span>)<span class="sc">^</span>(nu<span class="sc">/</span><span class="dv">2</span>))<span class="sc">/</span>(<span class="fu">gamma</span>(nu<span class="sc">/</span><span class="dv">2</span>)))<span class="sc">*</span>(<span class="fu">exp</span>(<span class="sc">-</span>nu<span class="sc">*</span>tau2<span class="sc">/</span>(<span class="dv">2</span><span class="sc">*</span>x))<span class="sc">/</span>(x<span class="sc">^</span>(<span class="dv">1</span><span class="sc">+</span>nu<span class="sc">/</span><span class="dv">2</span>))))</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(sigma2_post, <span class="at">freq =</span> F, <span class="at">main =</span> <span class="cn">NULL</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="fl">0.5</span>,<span class="fl">2.5</span>),</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"sigma2|y"</span>)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">seq</span>(<span class="fl">0.5</span>, <span class="fl">2.5</span>, <span class="at">length.out =</span> <span class="dv">1000</span>), <span class="fu">scaled_inv_chi2_pdf</span>(<span class="fu">seq</span>(<span class="fl">0.5</span>, <span class="fl">2.5</span>, <span class="at">length.out =</span> <span class="dv">1000</span>), <span class="at">nu =</span> lm_fit<span class="sc">$</span>df.residual, <span class="at">tau2 =</span> <span class="fu">sum</span>(lm_fit<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>)<span class="sc">/</span>lm_fit<span class="sc">$</span>df.residual),</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">col=</span><span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Posterior distribution of beta and sigma2 in bayesian linear regression</figcaption>
+</figure>
+</div>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># beta</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(MASS)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>X <span class="ot">=</span> <span class="fu">matrix</span>(<span class="fu">c</span>(dat_linear<span class="sc">$</span>x0, dat_linear<span class="sc">$</span>x1), <span class="at">ncol =</span> <span class="dv">2</span>, <span class="at">byrow =</span> F)</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>Beta <span class="ot">=</span> <span class="fu">sapply</span>(sigma2_post, <span class="cf">function</span>(z) <span class="fu">mvrnorm</span>(<span class="at">n=</span><span class="dv">1</span>, <span class="at">mu =</span> <span class="fu">solve</span>(<span class="fu">t</span>(X)<span class="sc">%*%</span>X)<span class="sc">%*%</span><span class="fu">t</span>(X)<span class="sc">%*%</span><span class="fu">as.matrix</span>(dat_linear<span class="sc">$</span>Y, <span class="at">ncol=</span><span class="dv">1</span>), <span class="at">Sigma =</span> z<span class="sc">*</span><span class="fu">solve</span>(<span class="fu">t</span>(X)<span class="sc">%*%</span>X)))</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="do">## beta0</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(beta0_post, <span class="at">freq =</span> F, <span class="at">main =</span> <span class="cn">NULL</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>,<span class="fl">1.5</span>),</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"beta0|y"</span>)</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">density</span>(Beta[<span class="dv">1</span>, ])<span class="sc">$</span>x, <span class="fu">density</span>(Beta[<span class="dv">1</span>, ])<span class="sc">$</span>y, </span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">col=</span><span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-14-2.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Posterior distribution of beta and sigma2 in bayesian linear regression</figcaption>
+</figure>
+</div>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="do">## beta1</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(beta1_post, <span class="at">freq =</span> F, <span class="at">main =</span> <span class="cn">NULL</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="fl">1.5</span>),</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"beta1|y"</span>)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">density</span>(Beta[<span class="dv">2</span>, ])<span class="sc">$</span>x, <span class="fu">density</span>(Beta[<span class="dv">2</span>, ])<span class="sc">$</span>y, </span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">col=</span><span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-14-3.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Posterior distribution of beta and sigma2 in bayesian linear regression</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-tip">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>The marginal posterior distribution of <span class="math inline">\(\boldsymbol \beta\)</span> is unknown up to this point and its conditional posterior distribution is known, multivariate normal. Thus, we can simulate posterior draws of <span class="math inline">\(\boldsymbol \beta\)</span> based on the conditional distribution and simulated draws of <span class="math inline">\(\sigma^2\)</span> to compare with draws obtained from Stan.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="stan-is-powerful" class="level3">
+<h3 class="anchored" data-anchor-id="stan-is-powerful">Stan is Powerful!!!</h3>
 
 
 </section>
