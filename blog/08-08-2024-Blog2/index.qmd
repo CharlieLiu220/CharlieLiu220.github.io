@@ -258,3 +258,5 @@ lines(seq(0, 1, length.out = 1000), dbeta(seq(0, 1, length.out = 1000),
                               shape2 = sum(Alpha[-4]+y_multinomial[-4])),
       col="red")
 ```
+
+### Example 4, linear regression under  
