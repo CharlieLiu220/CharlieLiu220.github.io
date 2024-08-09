@@ -132,7 +132,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="../../blogs.html" rel="" target="">
- <span class="menu-text">Kaixing’s Blog</span></a>
+ <span class="menu-text">Blog</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="../../resources.html" rel="" target="">
@@ -194,6 +194,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#example-1-beta-binomial" id="toc-example-1-beta-binomial" class="nav-link active" data-scroll-target="#example-1-beta-binomial">Example 1, beta-binomial</a></li>
+  <li><a href="#example-2-normal-normal" id="toc-example-2-normal-normal" class="nav-link" data-scroll-target="#example-2-normal-normal">Example 2, normal-normal</a></li>
+  <li><a href="#example-3-dirichlet-multinomial" id="toc-example-3-dirichlet-multinomial" class="nav-link" data-scroll-target="#example-3-dirichlet-multinomial">Example 3, Dirichlet-multinomial</a></li>
   </ul>
 </nav>
     </div>
@@ -232,6 +234,8 @@ p(\theta|\boldsymbol{y})\propto p(\boldsymbol{y}|\theta)\pi(\theta)\propto \thet
 </div>
 </div>
 <div class="cell">
+<details>
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># specify prior and data generation mechanism</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="do">## hyperparameters</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>alpha <span class="ot">=</span> <span class="dv">1</span></span>
@@ -241,9 +245,12 @@ p(\theta|\boldsymbol{y})\propto p(\boldsymbol{y}|\theta)\pi(\theta)\propto \thet
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>n <span class="ot">=</span> <span class="dv">100</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">0808</span>)</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>y <span class="ot">=</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="at">prob =</span> theta)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <p>Before we call Stan in R, we need to create a <code>.stan</code> file (easy to do in Rstudio) written in Stan language, pretty straightforward and concise. (<a href="https://mc-stan.org/docs/reference-manual/">Stan Reference Manual for language details</a>)</p>
 <div class="cell" data-output.var="beta_binomial_model">
+<details>
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> { <span class="co">// Y is the observation vector with N observations</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">int</span> Y;</span>
@@ -259,14 +266,18 @@ p(\theta|\boldsymbol{y})\propto p(\boldsymbol{y}|\theta)\pi(\theta)\propto \thet
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    Y[n] ~ binomial(<span class="dv">1</span>, theta); <span class="co">// specify model for data</span></span>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <p>Now we can load <code>rstan</code> package and call <code>stan</code> function to simulate a posterior sample. (For this example, executable Stan code is inserted to output a <code>stanmodel</code> for <code>sampling</code> function as input. If we create a separate <code>.stan</code> file in the same directory, use <code>stan</code> function.)</p>
 <div class="cell">
+<details>
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rstan)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">mc.cores =</span> parallel<span class="sc">::</span><span class="fu">detectCores</span>()) <span class="co"># parallel computing, one chain per core</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">rstan_options</span>(<span class="at">auto_write =</span> <span class="cn">TRUE</span>) <span class="co"># only need one time of compilation of C++ code</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">=</span> <span class="fu">list</span>(<span class="at">N=</span>n, <span class="at">Y=</span>y) <span class="co"># consistent with data block in .stan file</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>beta_binomial_fit <span class="ot">=</span> <span class="fu">sampling</span>(beta_binomial_model, <span class="at">data =</span> dat, <span class="at">algorithm=</span><span class="st">"HMC"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <div class="callout callout-style-simple callout-note">
 <div class="callout-body d-flex">
@@ -280,6 +291,8 @@ p(\theta|\boldsymbol{y})\propto p(\boldsymbol{y}|\theta)\pi(\theta)\propto \thet
 </div>
 <p>The match between the histogram of the sample and the theoretical density curve of the posterior distribution is satisfactory.</p>
 <div class="cell">
+<details>
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>theta_post <span class="ot">=</span> <span class="fu">extract</span>(beta_binomial_fit, <span class="at">permuted=</span>T)<span class="sc">$</span>theta</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(theta_post, <span class="at">freq =</span> F, <span class="at">main =</span> <span class="cn">NULL</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"theta|y"</span>)</span>
@@ -287,11 +300,217 @@ p(\theta|\boldsymbol{y})\propto p(\boldsymbol{y}|\theta)\pi(\theta)\propto \thet
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>                              <span class="at">shape1 =</span> alpha<span class="sc">+</span><span class="fu">sum</span>(y),</span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>                              <span class="at">shape2 =</span> beta<span class="sc">+</span>n<span class="sc">-</span><span class="fu">sum</span>(y)),</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">col=</span><span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
 <figcaption class="figure-caption">Posterior distribution of theta in beta-binomial example</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="example-2-normal-normal" class="level3">
+<h3 class="anchored" data-anchor-id="example-2-normal-normal">Example 2, normal-normal</h3>
+<p><span class="math display">\[
+\mu\sim N(\mu_0, \sigma_0^2)
+\]</span></p>
+<p><span class="math display">\[
+Y|\mu,\sigma^2\sim N(\mu, \sigma^2)
+\]</span></p>
+<p><span class="math display">\[
+p(\mu|\boldsymbol y)\propto \exp(-\frac{(\mu-\mu_0)^2}{2\cdot \sigma_0^2})\exp(-\frac{\sum_i (y_i-\mu)^2}{2\cdot \sigma^2})
+\]</span></p>
+<p>Therefore,</p>
+<p><span class="math display">\[
+\mu|\boldsymbol {y}\sim N(\frac{\frac{1}{\sigma_0^2}\mu_0+\frac{n}{\sigma^2}\bar y}{\frac{1}{\sigma_0^2}+\frac{n}{\sigma^2}},\frac{\sigma_0^2\sigma^2}{n\sigma_0^2+\sigma^2})
+\]</span></p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># set prior and generate data</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>mu_0 <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>sigma_0 <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>mu <span class="ot">=</span> <span class="fl">1.5</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">0808</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>y_normal <span class="ot">=</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> mu, <span class="at">sd =</span> <span class="dv">5</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>dat_normal <span class="ot">=</span> <span class="fu">list</span>(<span class="at">N=</span>n, <span class="at">Y=</span>y_normal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>(Refer to <a href="https://mc-stan.org/docs/functions-reference/">this</a> for functions defined in Stan)</p>
+<div class="cell" data-output.var="normal_normal_model">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> { <span class="co">// Y is the observation vector with N observations</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">real</span> Y;</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> { <span class="co">// mu is unbounded</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> mu;</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">target +=</span> normal_lpdf(mu|<span class="dv">0</span>, <span class="dv">1</span>);</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">target +=</span> normal_lpdf(Y|mu, <span class="dv">5</span>);</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># MCMC and plot</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>normal_normal_fit <span class="ot">=</span> <span class="fu">sampling</span>(normal_normal_model, <span class="at">data =</span> dat_normal, <span class="at">iter=</span><span class="dv">2000</span>, <span class="at">chains=</span><span class="dv">4</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>mu_post <span class="ot">=</span> <span class="fu">extract</span>(normal_normal_fit, <span class="at">permuted=</span>T)<span class="sc">$</span>mu</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(mu_post, <span class="at">freq =</span> F, <span class="at">main =</span> <span class="cn">NULL</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"mu|y"</span>, <span class="at">xlim=</span><span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">4</span>))</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">seq</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">4</span>, <span class="at">length.out =</span> <span class="dv">1000</span>), <span class="fu">dnorm</span>(<span class="fu">seq</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">4</span>, <span class="at">length.out =</span> <span class="dv">1000</span>),</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>                              <span class="at">mean =</span> (mu_0<span class="sc">/</span>sigma_0<span class="sc">^</span><span class="dv">2</span><span class="sc">+</span><span class="fu">sum</span>(y_normal)<span class="sc">/</span><span class="dv">5</span><span class="sc">^</span><span class="dv">2</span>)<span class="sc">/</span>(n<span class="sc">/</span><span class="dv">5</span><span class="sc">^</span><span class="dv">2</span><span class="sc">+</span><span class="dv">1</span><span class="sc">/</span>sigma_0<span class="sc">^</span><span class="dv">2</span>),</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>                              <span class="at">sd =</span> <span class="fu">sqrt</span>(<span class="dv">5</span><span class="sc">^</span><span class="dv">2</span><span class="sc">*</span>sigma_0<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span>(n<span class="sc">*</span>sigma_0<span class="sc">^</span><span class="dv">2</span><span class="sc">+</span><span class="dv">5</span><span class="sc">^</span><span class="dv">2</span>))),</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">col=</span><span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Posterior distribution of mu in normal-normal example</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="example-3-dirichlet-multinomial" class="level3">
+<h3 class="anchored" data-anchor-id="example-3-dirichlet-multinomial">Example 3, Dirichlet-multinomial</h3>
+<p>This is the multivariate-extension of beta-binomial model.</p>
+<p><span class="math display">\[
+(\theta_1,\theta_2,...,\theta_K)\sim \text{Dir}(\alpha_1,\alpha_2,...,\alpha_K),\ \text{where} \sum_k \theta_k=1\ \text{and}\ \theta_k\geq 0\ \forall k
+\]</span></p>
+<p><span class="math display">\[
+(Y_1,Y_2,...,Y_K)\sim \text{Multinomial}(n,\boldsymbol {\theta}),\ \text{where} \sum_i Y_i=n
+\]</span></p>
+<p><span class="math display">\[
+p(\boldsymbol{\theta}|\boldsymbol{y})\propto \Pi_k \theta_k^{y_k}\Pi_k \theta_k^{\alpha_k-1}
+\]</span></p>
+<p>Therefore,</p>
+<p><span class="math display">\[
+\boldsymbol{\theta}|\boldsymbol{y}\sim \text{Dir}(\alpha_1',\alpha_2',...,\alpha_K'), \text{where}\ \alpha_k'=\alpha_k+y_k\ \forall k
+\]</span></p>
+<p>It <a href="https://statisticaloddsandends.wordpress.com/2021/04/20/marginal-distributions-of-the-dirichlet-distribution-and-the-aggregation-property/">can be shown</a> that the marginal distribution of a Dirichlet distribution is a beta distribution, for example, <span class="math inline">\(\theta_1|\boldsymbol {y}\sim \text{Beta}(\alpha_1',\sum_k\alpha_k'-\alpha_1')\)</span>.</p>
+<p>Here, we consider <span class="math inline">\(5\)</span> categories and a uniform prior with <span class="math inline">\(\alpha_k=1\ \forall k\)</span>.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># set prior and generate data</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>Alpha <span class="ot">=</span> <span class="fu">c</span>(<span class="at">alpha1 =</span> <span class="dv">1</span>, <span class="at">alpha2 =</span> <span class="dv">1</span>, <span class="at">alpha3 =</span> <span class="dv">1</span>,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">alpha4 =</span> <span class="dv">1</span>, <span class="at">alpha5 =</span> <span class="dv">1</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>Theta <span class="ot">=</span> <span class="fu">c</span>(<span class="at">theta1 =</span> <span class="fl">0.25</span>, <span class="at">theta2 =</span> <span class="fl">0.15</span>, <span class="at">theta3 =</span> <span class="fl">0.05</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">theta4 =</span> <span class="fl">0.35</span>, <span class="at">theta5 =</span> <span class="fl">0.20</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">0808</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>y_multinomial <span class="ot">=</span> <span class="fu">as.vector</span>(<span class="fu">rmultinom</span>(<span class="dv">1</span>, n, <span class="at">prob =</span> Theta))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-output.var="dirichlet_multinomial_model">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> { <span class="co">// Y is the observation vector with K categories</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">3</span>&gt; K;</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[K] <span class="dt">int</span> Y;</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> { <span class="co">// Thetas are bounded and sum to 1 </span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">simplex</span>[K] Theta;</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  Theta ~ dirichlet(rep_vector(<span class="dv">1</span>, K));</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  Y ~ multinomial(Theta);</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># MCMC and plot</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>dat_multinomial <span class="ot">=</span> <span class="fu">list</span>(<span class="at">K=</span><span class="dv">5</span>, <span class="at">Y=</span>y_multinomial)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>dirichlet_multinomial_fit <span class="ot">=</span> <span class="fu">sampling</span>(dirichlet_multinomial_model,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">data =</span> dat_multinomial)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="do">##</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>Theta1_post <span class="ot">=</span> <span class="fu">unlist</span>(<span class="fu">extract</span>(dirichlet_multinomial_fit, <span class="at">pars=</span><span class="st">"Theta[1]"</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>                      <span class="at">permuted =</span> T))</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(Theta1_post, <span class="at">freq =</span> F, <span class="at">main =</span> <span class="cn">NULL</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"theta[1]|y"</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">1000</span>), <span class="fu">dbeta</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">1000</span>),</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>                              <span class="at">shape1 =</span> Alpha[<span class="st">"alpha1"</span>]<span class="sc">+</span>y_multinomial[<span class="dv">1</span>],</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>                              <span class="at">shape2 =</span> <span class="fu">sum</span>(Alpha[<span class="sc">-</span><span class="dv">1</span>]<span class="sc">+</span>y_multinomial[<span class="sc">-</span><span class="dv">1</span>])),</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">col=</span><span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Posterior distribution of thetas in dirichlet-multinomial example</figcaption>
+</figure>
+</div>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>Theta2_post <span class="ot">=</span> <span class="fu">unlist</span>(<span class="fu">extract</span>(dirichlet_multinomial_fit, <span class="at">pars=</span><span class="st">"Theta[2]"</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">permuted =</span> T))</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(Theta2_post, <span class="at">freq =</span> F, <span class="at">main =</span> <span class="cn">NULL</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"theta[2]|y"</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">1000</span>), <span class="fu">dbeta</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">1000</span>),</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>                              <span class="at">shape1 =</span> Alpha[<span class="st">"alpha2"</span>]<span class="sc">+</span>y_multinomial[<span class="dv">2</span>],</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>                              <span class="at">shape2 =</span> <span class="fu">sum</span>(Alpha[<span class="sc">-</span><span class="dv">2</span>]<span class="sc">+</span>y_multinomial[<span class="sc">-</span><span class="dv">2</span>])),</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">col=</span><span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-10-2.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Posterior distribution of thetas in dirichlet-multinomial example</figcaption>
+</figure>
+</div>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="do">##</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>Theta3_post <span class="ot">=</span> <span class="fu">unlist</span>(<span class="fu">extract</span>(dirichlet_multinomial_fit, <span class="at">pars=</span><span class="st">"Theta[3]"</span>,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">permuted =</span> T))</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(Theta3_post, <span class="at">freq =</span> F, <span class="at">main =</span> <span class="cn">NULL</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"theta[3]|y"</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">1000</span>), <span class="fu">dbeta</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">1000</span>),</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>                              <span class="at">shape1 =</span> Alpha[<span class="st">"alpha3"</span>]<span class="sc">+</span>y_multinomial[<span class="dv">3</span>],</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>                              <span class="at">shape2 =</span> <span class="fu">sum</span>(Alpha[<span class="sc">-</span><span class="dv">3</span>]<span class="sc">+</span>y_multinomial[<span class="sc">-</span><span class="dv">3</span>])),</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">col=</span><span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-10-3.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Posterior distribution of thetas in dirichlet-multinomial example</figcaption>
+</figure>
+</div>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="do">##</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>Theta4_post <span class="ot">=</span> <span class="fu">unlist</span>(<span class="fu">extract</span>(dirichlet_multinomial_fit, <span class="at">pars=</span><span class="st">"Theta[4]"</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">permuted =</span> T))</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(Theta4_post, <span class="at">freq =</span> F, <span class="at">main =</span> <span class="cn">NULL</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"theta[4]|y"</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">1000</span>), <span class="fu">dbeta</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">1000</span>),</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>                              <span class="at">shape1 =</span> Alpha[<span class="st">"alpha4"</span>]<span class="sc">+</span>y_multinomial[<span class="dv">4</span>],</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>                              <span class="at">shape2 =</span> <span class="fu">sum</span>(Alpha[<span class="sc">-</span><span class="dv">4</span>]<span class="sc">+</span>y_multinomial[<span class="sc">-</span><span class="dv">4</span>])),</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">col=</span><span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-10-4.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Posterior distribution of thetas in dirichlet-multinomial example</figcaption>
 </figure>
 </div>
 </div>

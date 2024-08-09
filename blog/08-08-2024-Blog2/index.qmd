@@ -8,6 +8,7 @@ categories: [Bayesian Statistics, Stan, R] # self-defined categories
 draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
 format:
   html:
+    code-fold: true
     code-copy: true
 ---
 
@@ -97,5 +98,163 @@ hist(theta_post, freq = F, main = NULL, xlim = c(0,1),
 lines(seq(0.1, 1, length.out = 1000), dbeta(seq(0.1, 1, length.out = 1000),
                               shape1 = alpha+sum(y),
                               shape2 = beta+n-sum(y)),
+      col="red")
+```
+
+### Example 2, normal-normal
+
+$$
+\mu\sim N(\mu_0, \sigma_0^2)
+$$
+
+$$
+Y|\mu,\sigma^2\sim N(\mu, \sigma^2)
+$$
+
+$$
+p(\mu|\boldsymbol y)\propto \exp(-\frac{(\mu-\mu_0)^2}{2\cdot \sigma_0^2})\exp(-\frac{\sum_i (y_i-\mu)^2}{2\cdot \sigma^2})
+$$
+
+Therefore,
+
+$$
+\mu|\boldsymbol {y}\sim N(\frac{\frac{1}{\sigma_0^2}\mu_0+\frac{n}{\sigma^2}\bar y}{\frac{1}{\sigma_0^2}+\frac{n}{\sigma^2}},\frac{\sigma_0^2\sigma^2}{n\sigma_0^2+\sigma^2})
+$$
+
+```{r}
+# set prior and generate data
+mu_0 = 0
+sigma_0 = 1
+mu = 1.5
+set.seed(0808)
+y_normal = rnorm(n, mean = mu, sd = 5)
+dat_normal = list(N=n, Y=y_normal)
+```
+
+(Refer to [this](https://mc-stan.org/docs/functions-reference/) for functions defined in Stan)
+
+```{stan, output.var="normal_normal_model"}
+data { // Y is the observation vector with N observations
+  int<lower=0> N;
+  array[N] real Y;
+}
+
+parameters { // mu is unbounded
+  real mu;
+}
+
+model {
+  target += normal_lpdf(mu|0, 1);
+  target += normal_lpdf(Y|mu, 5);
+}
+
+```
+
+```{r, message=FALSE, fig.cap="Posterior distribution of mu in normal-normal example"}
+# MCMC and plot
+normal_normal_fit = sampling(normal_normal_model, data = dat_normal, iter=2000, chains=4)
+mu_post = extract(normal_normal_fit, permuted=T)$mu
+hist(mu_post, freq = F, main = NULL,
+     xlab = "mu|y", xlim=c(-1,4))
+lines(seq(-1, 4, length.out = 1000), dnorm(seq(-1, 4, length.out = 1000),
+                              mean = (mu_0/sigma_0^2+sum(y_normal)/5^2)/(n/5^2+1/sigma_0^2),
+                              sd = sqrt(5^2*sigma_0^2/(n*sigma_0^2+5^2))),
+      col="red")
+```
+
+### Example 3, Dirichlet-multinomial
+
+This is the multivariate-extension of beta-binomial model.
+
+$$
+(\theta_1,\theta_2,...,\theta_K)\sim \text{Dir}(\alpha_1,\alpha_2,...,\alpha_K),\ \text{where} \sum_k \theta_k=1\ \text{and}\ \theta_k\geq 0\ \forall k 
+$$
+
+$$
+(Y_1,Y_2,...,Y_K)\sim \text{Multinomial}(n,\boldsymbol {\theta}),\ \text{where} \sum_i Y_i=n
+$$
+
+$$
+p(\boldsymbol{\theta}|\boldsymbol{y})\propto \Pi_k \theta_k^{y_k}\Pi_k \theta_k^{\alpha_k-1}
+$$
+
+Therefore,
+
+$$
+\boldsymbol{\theta}|\boldsymbol{y}\sim \text{Dir}(\alpha_1',\alpha_2',...,\alpha_K'), \text{where}\ \alpha_k'=\alpha_k+y_k\ \forall k 
+$$
+
+It [can be shown](https://statisticaloddsandends.wordpress.com/2021/04/20/marginal-distributions-of-the-dirichlet-distribution-and-the-aggregation-property/) that the marginal distribution of a Dirichlet distribution is a beta distribution, for example, $\theta_1|\boldsymbol {y}\sim \text{Beta}(\alpha_1',\sum_k\alpha_k'-\alpha_1')$.
+
+Here, we consider $5$ categories and a uniform prior with $\alpha_k=1\ \forall k$.
+
+```{r}
+# set prior and generate data
+Alpha = c(alpha1 = 1, alpha2 = 1, alpha3 = 1,
+          alpha4 = 1, alpha5 = 1)
+Theta = c(theta1 = 0.25, theta2 = 0.15, theta3 = 0.05,
+          theta4 = 0.35, theta5 = 0.20)
+set.seed(0808)
+y_multinomial = as.vector(rmultinom(1, n, prob = Theta))
+```
+
+```{stan, output.var="dirichlet_multinomial_model"}
+data { // Y is the observation vector with K categories
+  int<lower=3> K;
+  array[K] int Y;
+}
+
+parameters { // Thetas are bounded and sum to 1 
+  simplex[K] Theta;
+}
+
+model {
+  Theta ~ dirichlet(rep_vector(1, K));
+  Y ~ multinomial(Theta);
+}
+
+```
+
+```{r, message=FALSE, fig.cap="Posterior distribution of thetas in dirichlet-multinomial example"}
+# MCMC and plot
+dat_multinomial = list(K=5, Y=y_multinomial)
+dirichlet_multinomial_fit = sampling(dirichlet_multinomial_model,
+                                     data = dat_multinomial)
+
+##
+Theta1_post = unlist(extract(dirichlet_multinomial_fit, pars="Theta[1]",
+                      permuted = T))
+hist(Theta1_post, freq = F, main = NULL, xlim = c(0,1),
+     xlab = "theta[1]|y")
+lines(seq(0, 1, length.out = 1000), dbeta(seq(0, 1, length.out = 1000),
+                              shape1 = Alpha["alpha1"]+y_multinomial[1],
+                              shape2 = sum(Alpha[-1]+y_multinomial[-1])),
+      col="red")
+## 
+Theta2_post = unlist(extract(dirichlet_multinomial_fit, pars="Theta[2]",
+                      permuted = T))
+hist(Theta2_post, freq = F, main = NULL, xlim = c(0,1),
+     xlab = "theta[2]|y")
+lines(seq(0, 1, length.out = 1000), dbeta(seq(0, 1, length.out = 1000),
+                              shape1 = Alpha["alpha2"]+y_multinomial[2],
+                              shape2 = sum(Alpha[-2]+y_multinomial[-2])),
+      col="red")
+##
+Theta3_post = unlist(extract(dirichlet_multinomial_fit, pars="Theta[3]",
+                      permuted = T))
+hist(Theta3_post, freq = F, main = NULL, xlim = c(0,1),
+     xlab = "theta[3]|y")
+lines(seq(0, 1, length.out = 1000), dbeta(seq(0, 1, length.out = 1000),
+                              shape1 = Alpha["alpha3"]+y_multinomial[3],
+                              shape2 = sum(Alpha[-3]+y_multinomial[-3])),
+      col="red")
+##
+Theta4_post = unlist(extract(dirichlet_multinomial_fit, pars="Theta[4]",
+                      permuted = T))
+hist(Theta4_post, freq = F, main = NULL, xlim = c(0,1),
+     xlab = "theta[4]|y")
+lines(seq(0, 1, length.out = 1000), dbeta(seq(0, 1, length.out = 1000),
+                              shape1 = Alpha["alpha4"]+y_multinomial[4],
+                              shape2 = sum(Alpha[-4]+y_multinomial[-4])),
       col="red")
 ```

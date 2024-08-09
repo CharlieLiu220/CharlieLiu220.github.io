@@ -1,5 +1,5 @@
 ---
-title: "Kaixing's Blog"
+title: "Blog"
 listing: 
   contents: blog # all Quarto docs in the `blog` directory will be included on your listing page
   type: default # or `default` or `table`; each type has its own set of yaml options to include
