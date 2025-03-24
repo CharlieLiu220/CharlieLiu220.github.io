@@ -402,4 +402,4 @@ lines(density(Beta[2, ])$x, density(Beta[2, ])$y,
 The marginal posterior distribution of $\boldsymbol \beta$ is unknown up to this point and its conditional posterior distribution is known, multivariate normal. Thus, we can simulate posterior draws of $\boldsymbol \beta$ based on the conditional distribution and simulated draws of $\sigma^2$ to compare with draws obtained from Stan.
 :::
 
-### Stan is Powerful!!!  
+### Stan is Powerful!!!

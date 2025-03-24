@@ -18,7 +18,7 @@ I am currently a graduate student in the [Department of Biostatistics](https://w
 
 ### Education
 
-**MS in Biostatistics**, 2023-2025, Vanderbilt University
+**PhD in Biostatistics**, 2023-2028 (expected), Vanderbilt University
 
 **BS in Biological Science (minor in Economics and Statistics)**, 2018-2023, Tsinghua University
 
@@ -26,8 +26,8 @@ I am currently a graduate student in the [Department of Biostatistics](https://w
 
 ### Research Interest
 
-**Causal Inference**: Instrumental Variable, G-Computation, and etc.
+**Causal Inference**: g-computation, semi-parametric theory & methods and etc.
 
-**Data Integration/Fusion**: Combine Randomized Clinical Trials and Observational Studies
+**Machine Learning and Deep Learning**
 
 **Fundamental Problems of Statistics** and **Data Visualization**
